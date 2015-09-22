@@ -31,7 +31,7 @@ public class CreateTournamentScript : MonoBehaviour
         RefreshDuration();
         Refresh(false);
         JumboButton.SetActive(false);
-        StartCoroutine(UIStateManager.GameAPI.GetGameDetails(UIStateManager.Manager.GameID, OnGetGameDetails));
+        StartCoroutine(UIStateManager.GameAPI.GetGameDetails(UIStateManager.Manager.GetGameID(), OnGetGameDetails));
     }
 
     void OnGetGameDetails(string errorString, GameDetail result, params object[] userParam)
@@ -95,7 +95,7 @@ public class CreateTournamentScript : MonoBehaviour
         UIStateManager.Manager.SetLoading(true);
         StartCoroutine(UIStateManager.GameAPI.GetSubGameLevelsAvailableToPlayer(
             playerUserId : UIStateManager.Manager.PlayerId,
-            levelId : UIStateManager.Manager.UserTournamentID,
+            levelId : UIStateManager.Manager.GetUserTournamentID(),
             sortType : (int)UIStateManager.Manager.GameLevelSortType,
             startIndex : 1,
             endIndex : 100,

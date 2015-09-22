@@ -10,7 +10,7 @@ public class UserTournamentScript : MonoBehaviour
 
     void Start()
     {
-        StartCoroutine(UIStateManager.GameAPI.GetGameDetails(UIStateManager.Manager.GameID, OnGetGameDetails));
+        StartCoroutine(UIStateManager.GameAPI.GetGameDetails(UIStateManager.Manager.GetGameID(), OnGetGameDetails));
     }
 
     void OnGetGameDetails(string errorString, GameDetail result, params object[] userParam)
@@ -68,7 +68,7 @@ public class UserTournamentScript : MonoBehaviour
             UIStateManager.Manager.SetLoading(true);
             StartCoroutine(UIStateManager.GameAPI.GetLeaderboardsByTagFromGame(
                 userName: UIStateManager.Manager.PlayerId,
-                gameId: UIStateManager.Manager.GameID,
+                gameId: UIStateManager.Manager.GetGameID(),
                 tag: tId,
                 activeOnly: true,
                 startIndex: 1,

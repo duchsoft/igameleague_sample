@@ -44,6 +44,7 @@ public class KeyValidationScript : MonoBehaviour
     {
         MenuSoundManager.Instance.PlayMenuClick();
         UIStateManager.GameAPI.OpenEntryKeyUrl(LeaderboardDetail.Id);
+        Debug.Log(LeaderboardDetail.Id);
 
     }
 

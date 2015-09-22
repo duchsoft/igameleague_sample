@@ -32,7 +32,7 @@ public class ChallengesScript : MonoBehaviour
         StartCoroutine(
             UIStateManager.GameAPI.GetSubGameLevelsAvailableToPlayer(
                 UIStateManager.Manager.PlayerId,
-                UIStateManager.Manager.LiveTournamentID,
+                UIStateManager.Manager.GetLiveTournamentID(),
                 (int)UIStateManager.Manager.GameLevelSortType,
                 ((ItemPerPages * m_PageNo) - ItemPerPages) + 1,
                 (ItemPerPages * m_PageNo) + 1,

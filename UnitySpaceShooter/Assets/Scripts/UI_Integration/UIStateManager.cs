@@ -9,25 +9,97 @@ using System.Text;
 
 public class UIStateManager : MonoBehaviour
 {
-
+    [HideInInspector]
+    public CurrencyType currencyType;
     public GameOrientation GameOrientation;
+    [HideInInspector]
     public GameLevelSortType GameLevelSortType;
     public bool SandboxModeEnabled = false;
     public bool LockFps = true;
+    public int FpsClampValue = 30;
     public bool ShowLoadingScreen = true;
     public bool DeleteAllPlayerPrefs = false;
 
-    public int FpsClampValue = 30;
+    string LiveUrlFormat = "https://igameleague.azurewebsites.net/Service.asmx/{0}";
 
-    public string DeveloperId;
-    public string IntegrationKey;
+    //Live INR URLs
 
-    public string Password;
+    string LiveRegistrationUrlInr = "https://www.igameleague.in/Registration.aspx";
+    string LiveLeaderboardUrlInr = "https://www.igameleague.in/ScoreboardDetails.aspx";
+    string LivePlayerPageUrlInr = "https://www.igameleague.in/PlayerZone/PlayerPage.aspx";
+    string LiveEntryKeyUrlInr = "https://igameleague.azurewebsites.net/EntryKey.aspx";
+    string BuylinkUrlInr = "https://www.igameleague.in/CommonZone/BuyPoints.aspx";
+    string HomeUrlInr = "https://www.igameleague.in/default.aspx";
+
+    //Live USD URLs
+
+    string LiveSandboxRegistrationUrlUsd = "https://www.igameleague.com/Registration.aspx";
+    string LiveLeaderboardUrlUsd = "https://www.igameleague.com/ScoreboardDetails.aspx";
+    string LivePlayerPageUrlUsd = "https://www.igameleague.com/PlayerZone/PlayerPage.aspx";
+    string LiveEntryKeyUrlUsd = "https://www.igameleague.com/EntryKey.aspx";
+    string BuylinkUrlUsd = "https://igameleague-usd.azurewebsites.net/CommonZone/BuyPoints.aspx";
+    string HomeUrlUsd = "https://www.igameleague.com/default.aspx";
+
+
+    string SandboxUrlFormat = "http://sandbox-igameleague.azurewebsites.net/Service.asmx/{0}";
+
+    //Sandbox INR URLs
+
+    string SandboxRegistrationUrlInr = "https://sandbox-igameleague-inr.azurewebsites.net/Registration.aspx";
+    string SandboxLeaderboardUrlInr = "https://sandbox-igameleague-inr.azurewebsites.net/ScoreboardDetails.aspx";
+    string SandboxPlayerPageUrlInr = "https://sandbox-igameleague-inr.azurewebsites.net/PlayerZone/PlayerPage.aspx";
+    string SandboxEntryKeyUrlInr = "https://sandbox-igameleague-inr.azurewebsites.net/EntryKey.aspx";
+    [HideInInspector]
+    public string SandboxBuylinkUrl = "https://sandbox-igameleague-inr.azurewebsites.net/CommonZone/BuyPoints.aspx";
+    string SandboxHomeUrl = "https://sandbox-igameleague-inr.azurewebsites.net/default.aspx";
+
+    //Sandbox USD URLs
+
+    string SandboxRegistrationUrlUsd = "https://sandbox-igameleague.azurewebsites.net/Registration.aspx";
+    string SandboxLeaderboardUrlUsd = "https://sandbox-igameleague.azurewebsites.net/ScoreboardDetails.aspx";
+    string SandboxPlayerPageUrlUsd = "https://sandbox-igameleague.azurewebsites.net/PlayerZone/PlayerPage.aspx";
+    string SandboxEntryKeyUrlUsd = "https://sandbox-igameleague.azurewebsites.net/EntryKey.aspx";
+    [HideInInspector]
+    public string SandboxBuylinkUrlUsd = "https://sandbox-igameleague.azurewebsites.net/CommonZone/BuyPoints.aspx";
+    string SandboxHomeUrlUsd = "https://sandbox-igameleague.azurewebsites.net/default.aspx";
+
+    //Common Live IDs
+
+    public string DeveloperIdLive;
+    public string IntegrationKeyLive;
+
+    //Live INR IDs
+
+    public string GameIdLiveInr;
+    public string LiveTournamentIdLiveInr;
+    public string UserTournamentIdLiveInr;
+
+    //Live USD IDs
+
+    public string GameIdLiveUsd;
+    public string LiveTournamentIdLiveUsd;
+    public string UserTournamentIdLiveUsd;
+
+    //Common Sandbox IDs
+
+    public string DeveloperIdSandbox;
+    public string IntegrationKeySandbox;
+
+    //Sandbox INR IDs
+
+    public string GameIdSandboxInr;
+    public string LiveTournamentIdSandboxInr;
+    public string UserTournamentIdSandboxInr;
+
+    //Sandbox USD IDs
+
+    public string GameIdSandboxUsd;
+    public string LiveTournamentIdSandboxUsd;
+    public string UserTournamentIdSandboxUsd;
 
     public delegate void OnConnectionChangeHandler(bool online);
     public event OnConnectionChangeHandler OnConnectionChange;
 
-    const string FavKey = "asdadad";
     public static UIStateManager Manager;
     public static IGL GameAPI;
     public GameObject Loader;
@@ -47,10 +119,6 @@ public class UIStateManager : MonoBehaviour
     public Sprite ShareTexture;
     public Sprite SponsoredIcon;
     public Sprite UserTournamentIcon;
-
-    public string GameID;
-    public string LiveTournamentID;
-    public string UserTournamentID;
 
     public GameObject SplashTitlePage;
     public GameObject SplashCompanyLogoPage;
@@ -91,6 +159,22 @@ public class UIStateManager : MonoBehaviour
     public string CurrentActivationKey = string.Empty;
 
     public bool ShowScore = false;
+
+    string gameDownloadUrl = string.Empty;
+    string registrationUrl = string.Empty;
+    string playerPageUrl = string.Empty;
+    string leaderboardUrl = string.Empty;
+    string entryKeyUrl = string.Empty;
+    string buyUrl = string.Empty;
+    string homeUrl = string.Empty;
+
+    string developerId = string.Empty;
+    string integrationKey = string.Empty;
+    string urlFormat = string.Empty;
+    string gameId = string.Empty;
+    string liveTournamentId = string.Empty;
+    string userTournamentId = string.Empty;
+
     void Awake()
     {
         if (LockFps)
@@ -148,13 +232,19 @@ public class UIStateManager : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-
         if (DeleteAllPlayerPrefs)
         {
             PlayerPrefs.DeleteAll();
         }
-        GameAPI = new IGL(DeveloperId, IntegrationKey, SandboxModeEnabled);
+        GameAPI = new IGL(GetDeveloperID(), GetIntegrationKey());
 
+        IGL.URL_FORMAT = GetUrlFormat();
+        IGL.REGISTRATION_URL = GetRegistrationUrl();
+        IGL.LEADERBOARD_URL = GetLeaderboardUrl();
+        IGL.PLAYER_PAGE_URL = GetPlayerPageUrl();
+        IGL.ENTRYKEY_URL = GetEntryKeyUrl();
+        Debug.Log(IGL.URL_FORMAT);
+        Debug.Log(GetDeveloperID());
         switch (GameOrientation)
         {
             case GameOrientation.Landscape:
@@ -200,6 +290,272 @@ public class UIStateManager : MonoBehaviour
 
         StartProcessScoreQueue();
         SwapToCompanyLogoSplash();
+    }
+
+    public string GetDeveloperID()
+    {
+        if (SandboxModeEnabled)
+        {
+            developerId = DeveloperIdSandbox;
+        }
+        else
+        {
+            developerId = DeveloperIdLive;
+        }
+
+        return developerId;
+    }
+
+    public string GetIntegrationKey()
+    {
+        if (SandboxModeEnabled)
+        {
+            integrationKey = IntegrationKeySandbox;
+        }
+        else
+        {
+            integrationKey = IntegrationKeyLive;
+        }
+
+        return integrationKey;
+    }
+
+    public string GetUrlFormat()
+    {
+        if (SandboxModeEnabled)
+        {
+            urlFormat = SandboxUrlFormat;
+            Debug.Log(urlFormat);
+        }
+        else
+        {
+            urlFormat = LiveUrlFormat;
+        }
+
+        return urlFormat;
+    }
+
+    public string GetGameID()
+    {
+        if (SandboxModeEnabled)
+        {
+            switch (currencyType)
+            {
+                case CurrencyType.INR:
+                    gameId = GameIdSandboxInr;
+                    break;
+                case CurrencyType.USD:
+                    gameId = GameIdSandboxUsd;
+                    break;
+            }
+
+        }
+        else
+        {
+            switch (currencyType)
+            {
+                case CurrencyType.INR:
+                    gameId = GameIdLiveInr;
+                    break;
+                case CurrencyType.USD:
+                    gameId = GameIdLiveUsd;
+                    break;
+            }
+        }
+        return gameId;
+    }
+
+    public string GetLiveTournamentID()
+    {
+        if (SandboxModeEnabled)
+        {
+            switch (currencyType)
+            {
+                case CurrencyType.INR:
+                    liveTournamentId = LiveTournamentIdSandboxInr;
+                    break;
+                case CurrencyType.USD:
+                    liveTournamentId = LiveTournamentIdSandboxUsd;
+                    break;
+            }
+        }
+        else
+        {
+            switch (currencyType)
+            {
+                case CurrencyType.INR:
+                    liveTournamentId = LiveTournamentIdLiveInr;
+                    break;
+                case CurrencyType.USD:
+                    liveTournamentId = LiveTournamentIdLiveUsd;
+                    break;
+            }
+        }
+
+        return liveTournamentId;
+    }
+
+    public string GetUserTournamentID()
+    {
+        if (SandboxModeEnabled)
+        {
+            switch (currencyType)
+            {
+                case CurrencyType.INR:
+                    userTournamentId = UserTournamentIdSandboxInr;
+                    break;
+                case CurrencyType.USD:
+                    userTournamentId = UserTournamentIdSandboxUsd;
+                    break;
+            }
+        }
+        else
+        {
+            switch (currencyType)
+            {
+                case CurrencyType.INR:
+                    userTournamentId = UserTournamentIdLiveInr;
+                    break;
+                case CurrencyType.USD:
+                    userTournamentId = UserTournamentIdLiveUsd;
+                    break;
+            }
+        }
+
+        return userTournamentId;
+    }
+
+    public string GetRegistrationUrl()
+    {
+        if (SandboxModeEnabled)
+        {
+            switch (currencyType)
+            {
+                case CurrencyType.INR:
+                    registrationUrl = SandboxRegistrationUrlInr;
+                    break;
+                case CurrencyType.USD:
+                    registrationUrl = SandboxRegistrationUrlUsd;
+                    break;
+            }
+        }
+        else
+        {
+            switch (currencyType)
+            {
+                case CurrencyType.INR:
+                    registrationUrl = LiveRegistrationUrlInr;
+                    break;
+                case CurrencyType.USD:
+                    registrationUrl = LiveSandboxRegistrationUrlUsd;
+                    break;
+            }
+        }
+
+        return registrationUrl;
+    }
+
+    public string GetLeaderboardUrl()
+    {
+        if (SandboxModeEnabled)
+        {
+            switch (currencyType)
+            {
+                case CurrencyType.INR:
+                    leaderboardUrl = SandboxLeaderboardUrlInr;
+                    break;
+                case CurrencyType.USD:
+                    leaderboardUrl = SandboxLeaderboardUrlUsd;
+                    break;
+            }
+        }
+        else
+        {
+            switch (currencyType)
+            {
+                case CurrencyType.INR:
+                    leaderboardUrl = LiveLeaderboardUrlInr;
+                    break;
+                case CurrencyType.USD:
+                    leaderboardUrl = LiveLeaderboardUrlUsd;
+                    break;
+            }
+        }
+
+        return leaderboardUrl;
+    }
+
+    public string GetPlayerPageUrl()
+    {
+        if (SandboxModeEnabled)
+        {
+            switch (currencyType)
+            {
+                case CurrencyType.INR:
+                    playerPageUrl = SandboxPlayerPageUrlInr;
+                    break;
+                case CurrencyType.USD:
+                    playerPageUrl = SandboxPlayerPageUrlUsd;
+                    break;
+            }
+        }
+        else
+        {
+            switch (currencyType)
+            {
+                case CurrencyType.INR:
+                    playerPageUrl = LivePlayerPageUrlInr;
+                    break;
+                case CurrencyType.USD:
+                    playerPageUrl = LivePlayerPageUrlUsd;
+                    break;
+            }
+        }
+
+        return playerPageUrl;
+    }
+
+    public string GetEntryKeyUrl()
+    {
+        if (SandboxModeEnabled)
+        {
+            switch (currencyType)
+            {
+                case CurrencyType.INR:
+                    entryKeyUrl = SandboxEntryKeyUrlInr;
+                    break;
+                case CurrencyType.USD:
+                    entryKeyUrl = SandboxEntryKeyUrlUsd;
+                    break;
+            }
+        }
+        else
+        {
+            switch (currencyType)
+            {
+                case CurrencyType.INR:
+                    entryKeyUrl = LiveEntryKeyUrlInr;
+                    break;
+                case CurrencyType.USD:
+                    entryKeyUrl = LiveEntryKeyUrlUsd;
+                    break;
+            }
+        }
+
+        return entryKeyUrl;
+    }
+
+    public void SetCurrencyType(int currencyType)
+    {
+        PlayerPrefs.SetInt("CurrencyType", currencyType);
+    }
+
+    public void GetCurrency()
+    {
+        if (PlayerPrefs.HasKey("CurrencyType"))
+        {
+            currencyType = (CurrencyType)PlayerPrefs.GetInt("CurrencyType");
+        }
     }
 
     private void StartProcessScoreQueue()
@@ -354,7 +710,7 @@ public class UIStateManager : MonoBehaviour
         SwapToPage(HelpPage);
     }
 
-    
+
     public void OpenMoreGames()
     {
         Application.OpenURL("http://games4stars.azurewebsites.net/Games.aspx");
@@ -439,7 +795,7 @@ public class UIStateManager : MonoBehaviour
                 leaderBoardId: leaderboardDetail.Id,
                 score: score,
                 updateIfBetterThanPrevious: true,
-                onUpdatePlayerScoreFn : OnUpdateScore));
+                onUpdatePlayerScoreFn: OnUpdateScore));
             ScoreHistorySystem.AddEntry(PlayerId, score, leaderboardDetail.Id, DateTime.Now.ToString());
         }
     }

@@ -77,7 +77,7 @@ public class PostCreateLeaderboardScript : MonoBehaviour
 			UIStateManager.Manager.SetLoading (true);
             StartCoroutine(UIStateManager.GameAPI.GetLeaderboardsByTagFromGame(
                 userName: UIStateManager.Manager.PlayerId,
-                gameId: UIStateManager.Manager.GameID,
+                gameId: UIStateManager.Manager.GetGameID(),
                 tag: tId,
                 activeOnly: true,
                 startIndex: 1,
